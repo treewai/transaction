@@ -1,28 +1,83 @@
 package db
 
-import "github.com/treewai/transaction/models"
+import (
+	"errors"
+
+	"github.com/treewai/transaction/models"
+)
+
+var (
+	ErrIDNotFound = errors.New("ID Not Found")
+)
 
 func (db *database) GetAllTransactions() []models.Transaction {
-	// TODO
-	return db.transactions
+	db.Lock()
+	defer db.Unlock()
+
+	var transactions []models.Transaction
+	for _, v := range db.transactions {
+		transactions = append(transactions, *v)
+	}
+	return transactions
 }
 
-func (db *database) GetTransaction() models.Transaction {
-	// TODO
-	return models.Transaction{}
+func (db *database) GetTransaction(id int) (models.Transaction, error) {
+	db.Lock()
+	defer db.Unlock()
+
+	t, ok := db.transactions[id]
+	if !ok {
+		return models.Transaction{}, ErrIDNotFound
+	}
+	return *t, nil
 }
 
-func (db *database) AddTransaction(*models.Transaction) error {
-	// TODO
+func (db *database) AddTransaction(t *models.Transaction) error {
+	db.Lock()
+	defer db.Unlock()
+
+	db.lastID++
+	t.ID = db.lastID
+	db.transactions[t.ID] = t
 	return nil
 }
 
-func (db *database) UpdateTransaction(*models.Transaction) error {
-	// TODO
+func (db *database) UpdateTransaction(t *models.Transaction) error {
+	db.Lock()
+	defer db.Unlock()
+
+	tx, ok := db.transactions[t.ID]
+	if !ok {
+		return ErrIDNotFound
+	}
+
+	if t.Account != "" {
+		tx.Account = t.Account
+	}
+	if t.Type != "" {
+		tx.Type = t.Type
+	}
+	if t.Amount > 0.0 {
+		tx.Amount = t.Amount
+	}
+	if !t.Date.IsZero() {
+		tx.Date = t.Date
+	}
+	if t.User != "" {
+		tx.User = t.User
+	}
+
 	return nil
 }
 
 func (db *database) DeleteTransaction(id int) error {
-	// TODO
+	db.Lock()
+	defer db.Unlock()
+
+	if _, ok := db.transactions[id]; !ok {
+		return ErrIDNotFound
+	}
+
+	delete(db.transactions, id)
 	return nil
 }
