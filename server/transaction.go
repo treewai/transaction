@@ -28,6 +28,11 @@ func (s *Server) TransactionsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if t.Type != "Deposit" && t.Type != "Withdrawal" {
+			http.Error(w, "Type not support", http.StatusBadRequest)
+			return
+		}
+
 		if t.Date.IsZero() {
 			t.Date = time.Now()
 		}
@@ -52,7 +57,7 @@ func (s *Server) TransactionByIdHandler(w http.ResponseWriter, r *http.Request) 
 
 	id, err := strconv.Atoi(r.URL.Path[len("/transactions/"):])
 	if err != nil {
-		http.Error(w, "Not Found", http.StatusNotFound)
+		http.NotFound(w, r)
 		return
 	}
 
@@ -116,5 +121,5 @@ func (s *Server) TransactionByIdHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	http.Error(w, "Not Found", http.StatusNotFound)
+	http.NotFound(w, r)
 }
