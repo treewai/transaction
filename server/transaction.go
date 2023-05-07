@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/treewai/transaction/db"
 	"github.com/treewai/transaction/models"
@@ -25,6 +26,10 @@ func (s *Server) TransactionsHandler(w http.ResponseWriter, r *http.Request) {
 		if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
+		}
+
+		if t.Date.IsZero() {
+			t.Date = time.Now()
 		}
 
 		tx, err := s.db.AddTransaction(&t)

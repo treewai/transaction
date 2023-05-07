@@ -6,8 +6,11 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v5/request"
 	"github.com/treewai/transaction/models"
 )
+
+var secretKey = []byte("mysecretkey")
 
 func generateToken(username string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -16,7 +19,7 @@ func generateToken(username string) (string, error) {
 	claims["username"] = username
 	claims["exp"] = time.Now().Add(24 * time.Hour).Unix()
 
-	signedToken, err := token.SignedString([]byte("secret_key"))
+	signedToken, err := token.SignedString(secretKey)
 	if err != nil {
 		return "", err
 	}
@@ -30,16 +33,36 @@ func (s *Server) AuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.db.IsValidUser(&u) {
+	if s.db.IsValidUser(&u) {
 		token, err := generateToken(u.Username)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		w.Write([]byte(token))
+		m := make(map[string]string)
+		m["token"] = token
+		m["username"] = u.Username
+
+		if err := json.NewEncoder(w).Encode(m); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
+}
+
+func (s *Server) TokenMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor,
+			func(token *jwt.Token) (interface{}, error) {
+				return secretKey, nil
+			})
+		if err != nil || !token.Valid {
+			http.Error(w, "Unthorized", http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
 }

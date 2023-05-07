@@ -14,7 +14,7 @@ func (db *database) GetAllTransactions() []models.Transaction {
 	db.Lock()
 	defer db.Unlock()
 
-	var transactions []models.Transaction
+	transactions := []models.Transaction{}
 	for _, v := range db.transactions {
 		transactions = append(transactions, *v)
 	}

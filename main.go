@@ -12,8 +12,8 @@ func main() {
 	s := server.NewServer(db.NewDatabase())
 
 	http.HandleFunc("/auth", s.AuthHandler)
-	http.HandleFunc("/transactions", s.TransactionsHandler)
-	http.HandleFunc("/transactions/", s.TransactionByIdHandler)
+	http.HandleFunc("/transactions", s.TokenMiddleware(s.TransactionsHandler))
+	http.HandleFunc("/transactions/", s.TokenMiddleware(s.TransactionByIdHandler))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
