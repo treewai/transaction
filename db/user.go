@@ -4,13 +4,23 @@ import (
 	"github.com/treewai/transaction/models"
 )
 
-func getUsers() []models.User {
+func getDefaultUsers() []models.User {
 	return []models.User{
-		{1, "user1", "password1"},
-		{2, "user2", "password2"},
-		{3, "user3", "password3"},
-		{4, "user4", "password4"},
-		{5, "user5", "password5"},
+		{
+			ID:       1,
+			Username: "user1",
+			Password: "password1",
+		},
+		{
+			ID:       2,
+			Username: "user2",
+			Password: "password2",
+		},
+		{
+			ID:       3,
+			Username: "user3",
+			Password: "password3",
+		},
 	}
 }
 

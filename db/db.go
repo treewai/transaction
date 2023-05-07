@@ -25,7 +25,7 @@ type database struct {
 
 func NewDatabase() Database {
 	return &database{
-		users:        getUsers(),
+		users:        getDefaultUsers(),
 		transactions: make(map[int]*models.Transaction),
 	}
 }
