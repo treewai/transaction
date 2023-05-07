@@ -67,7 +67,7 @@ func (db *database) UpdateTransaction(t *models.Transaction) (models.Transaction
 		tx.User = t.User
 	}
 
-	return *t, nil
+	return *tx, nil
 }
 
 func (db *database) DeleteTransaction(id int) (models.Transaction, error) {
