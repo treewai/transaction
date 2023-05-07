@@ -32,23 +32,23 @@ func (db *database) GetTransaction(id int) (models.Transaction, error) {
 	return *t, nil
 }
 
-func (db *database) AddTransaction(t *models.Transaction) error {
+func (db *database) AddTransaction(t *models.Transaction) (models.Transaction, error) {
 	db.Lock()
 	defer db.Unlock()
 
 	db.lastID++
 	t.ID = db.lastID
 	db.transactions[t.ID] = t
-	return nil
+	return *t, nil
 }
 
-func (db *database) UpdateTransaction(t *models.Transaction) error {
+func (db *database) UpdateTransaction(t *models.Transaction) (models.Transaction, error) {
 	db.Lock()
 	defer db.Unlock()
 
 	tx, ok := db.transactions[t.ID]
 	if !ok {
-		return ErrIDNotFound
+		return models.Transaction{}, ErrIDNotFound
 	}
 
 	if t.Account != "" {
@@ -67,17 +67,18 @@ func (db *database) UpdateTransaction(t *models.Transaction) error {
 		tx.User = t.User
 	}
 
-	return nil
+	return *t, nil
 }
 
-func (db *database) DeleteTransaction(id int) error {
+func (db *database) DeleteTransaction(id int) (models.Transaction, error) {
 	db.Lock()
 	defer db.Unlock()
 
-	if _, ok := db.transactions[id]; !ok {
-		return ErrIDNotFound
+	t, ok := db.transactions[id]
+	if !ok {
+		return models.Transaction{}, ErrIDNotFound
 	}
 
 	delete(db.transactions, id)
-	return nil
+	return *t, nil
 }

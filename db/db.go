@@ -11,9 +11,9 @@ type Database interface {
 
 	GetAllTransactions() []models.Transaction
 	GetTransaction(int) (models.Transaction, error)
-	AddTransaction(*models.Transaction) error
-	UpdateTransaction(*models.Transaction) error
-	DeleteTransaction(int) error
+	AddTransaction(*models.Transaction) (models.Transaction, error)
+	UpdateTransaction(*models.Transaction) (models.Transaction, error)
+	DeleteTransaction(int) (models.Transaction, error)
 }
 
 type database struct {
@@ -25,6 +25,7 @@ type database struct {
 
 func NewDatabase() Database {
 	return &database{
+		users:        getUsers(),
 		transactions: make(map[int]*models.Transaction),
 	}
 }
