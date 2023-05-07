@@ -82,7 +82,7 @@ curl -X PUT "http://localhost:8080/transactions/1" -H "Content-type: application
 }
 ```
 
-- Update Transaction
+- Delete Transaction
 ```
 curl -X DELETE "http://localhost:8080/transactions/1" -H "Content-type: application/json" -H "Authorization: Bearer {token}"
 
